@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
+    "pytest-timeout>=2.1.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
     "black>=23.0",
@@ -67,7 +68,8 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 asyncio_mode = "auto"
-addopts = "--strict-markers --tb=short -v"
+addopts = "--strict-markers --tb=short -v --timeout=5"
+timeout = 5
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",

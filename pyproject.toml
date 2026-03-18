@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "socratic-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Core framework components for Socrates AI ecosystem"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -46,7 +46,17 @@ Repository = "https://github.com/Nireus79/Socrates"
 "Bug Tracker" = "https://github.com/Nireus79/Socrates/issues"
 
 [tool.setuptools]
-packages = ["socratic_core"]
+packages = [
+    "socratic_core",
+    "socratic_core.config",
+    "socratic_core.events",
+    "socratic_core.exceptions",
+    "socratic_core.logging",
+    "socratic_core.cli",
+    "socratic_core.api",
+    "socratic_core.utils",
+    "socratic_core.monitoring",
+]
 
 [tool.setuptools.package-dir]
 "" = "src"

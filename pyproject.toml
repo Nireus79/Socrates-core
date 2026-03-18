@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "socratic-core"
+version = "0.1.0"
+description = "Core framework for Socratic CLI and API libraries"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Socrates Team", email = "info@socrates-ai.dev"}
+]
+license = {text = "MIT"}
+keywords = ["cli", "framework", "commands", "socrates", "core"]
+
+dependencies = [
+    "colorama>=0.4.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    "ruff>=0.0.292",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nireus79/Socratic-core"
+Documentation = "https://github.com/Nireus79/Socratic-core"
+Repository = "https://github.com/Nireus79/Socratic-core.git"
+"Bug Tracker" = "https://github.com/Nireus79/Socratic-core/issues"
+
+[tool.setuptools]
+packages = ["socratic_core"]
+package-dir = {"" = "src"}
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

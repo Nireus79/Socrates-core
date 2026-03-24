@@ -5,9 +5,9 @@ Services publish events and subscribe to events they care about.
 Enables loose coupling between services.
 """
 
-from typing import Callable, Dict, List, Any, Optional
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
 
 
 @dataclass
@@ -62,9 +62,7 @@ class EventBus:
         if event_type in self._subscribers:
             self._subscribers[event_type].remove(handler)
 
-    async def publish(
-        self, event_type: str, source_service: str, data: Dict[str, Any]
-    ) -> None:
+    async def publish(self, event_type: str, source_service: str, data: Dict[str, Any]) -> None:
         """
         Publish an event to all subscribers.
 
@@ -90,9 +88,7 @@ class EventBus:
                 except Exception as e:
                     print(f"Error in event handler for {event_type}: {e}")
 
-    def get_event_history(
-        self, event_type: Optional[str] = None, limit: int = 100
-    ) -> List[Event]:
+    def get_event_history(self, event_type: Optional[str] = None, limit: int = 100) -> List[Event]:
         """
         Get event history.
 

@@ -10,9 +10,10 @@ Responsible for:
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable
-from core.base_service import BaseService
-from core.event_bus import EventBus
+from typing import Any, Callable, Dict, List, Optional
+
+from socratic_core.base_service import BaseService
+from socratic_core.event_bus import EventBus
 
 
 class ServiceOrchestrator:
@@ -78,12 +79,8 @@ class ServiceOrchestrator:
             deps = self.DEPENDENCIES.get(service_name, [])
             for dep in deps:
                 if dep not in self._started_services:
-                    self.logger.error(
-                        f"Cannot start {service_name}: dependency {dep} not started"
-                    )
-                    raise RuntimeError(
-                        f"Dependency {dep} not started for service {service_name}"
-                    )
+                    self.logger.error(f"Cannot start {service_name}: dependency {dep} not started")
+                    raise RuntimeError(f"Dependency {dep} not started for service {service_name}")
 
             service = self._services[service_name]
             try:
@@ -95,7 +92,9 @@ class ServiceOrchestrator:
                 raise
 
         # Publish system started event
-        await self.event_bus.publish("system_started", "orchestrator", {"services": self._started_services})
+        await self.event_bus.publish(
+            "system_started", "orchestrator", {"services": self._started_services}
+        )
         self.logger.info(f"All services started: {', '.join(self._started_services)}")
 
     async def stop_all_services(self) -> None:
@@ -136,13 +135,7 @@ class ServiceOrchestrator:
         """
         return self._services.get(service_name)
 
-    async def call_service(
-        self,
-        service_name: str,
-        method_name: str,
-        *args,
-        **kwargs
-    ) -> Any:
+    async def call_service(self, service_name: str, method_name: str, *args, **kwargs) -> Any:
         """
         Call a method on a service through the orchestrator.
 

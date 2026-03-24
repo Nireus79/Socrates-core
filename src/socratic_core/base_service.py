@@ -6,8 +6,8 @@ inherit from BaseService to ensure consistent interface and lifecycle management
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class BaseService(ABC):
@@ -69,9 +69,10 @@ class BaseService(ABC):
 
     def get_status(self) -> Dict[str, Any]:
         """Get current service status."""
+        last_check = self.last_health_check.isoformat() if self.last_health_check else None
         return {
             "service_name": self.service_name,
             "is_ready": self.is_ready,
             "created_at": self.created_at.isoformat(),
-            "last_health_check": self.last_health_check.isoformat() if self.last_health_check else None,
+            "last_health_check": last_check,
         }

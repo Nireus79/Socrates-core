@@ -1,5 +1,7 @@
 """Tests for core module."""
 
+import pytest
+
 from socratic_core.event_bus import EventBus
 
 
@@ -22,15 +24,17 @@ class TestEventBus:
         bus.subscribe("test_event", handler)
         assert len(bus._subscribers.get("test_event", [])) > 0
 
-    def test_event_emission(self):
+    @pytest.mark.asyncio
+    async def test_event_emission(self):
         """Should emit events to subscribers."""
         bus = EventBus()
         received = []
 
-        def handler(data):
-            received.append(data)
+        async def handler(event):
+            received.append(event)
 
         bus.subscribe("test_event", handler)
-        bus.emit("test_event", {"key": "value"})
+        await bus.publish("test_event", "test_service", {"key": "value"})
 
         assert len(received) > 0
+        assert received[0].event_type == "test_event"

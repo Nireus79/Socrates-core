@@ -6,7 +6,8 @@ Pydantic v2 models for validation and serialization.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
 
 

@@ -2,8 +2,6 @@
 
 import os
 
-import pytest
-
 from socratic_core.config import ConfigBuilder, SocratesConfig
 
 

@@ -1,5 +1,4 @@
-"""
-Utility functions and classes for Socratic Core.
+"""Utility functions and classes for Socratic Core.
 
 Provides common utilities like caching, ID generation, and datetime handling.
 """

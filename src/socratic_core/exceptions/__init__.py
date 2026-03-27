@@ -1,6 +1,4 @@
-"""
-Exception classes for Socrates core framework
-"""
+"""Exception classes for Socrates core framework"""
 
 from .errors import (
     APIError,

@@ -143,8 +143,10 @@ class SocratesConfig:
         Create configuration from environment variables.
 
         Environment variables:
-            ANTHROPIC_API_KEY or API_KEY_CLAUDE: Claude API key (optional - users can provide per-user keys via database)
-            ANTHROPIC_SUBSCRIPTION_TOKEN: Optional - Claude subscription token for subscription-based auth
+            ANTHROPIC_API_KEY or API_KEY_CLAUDE: Claude API key
+                (optional - users can provide per-user keys via database)
+            ANTHROPIC_SUBSCRIPTION_TOKEN: Claude subscription token
+                (optional, alternative to API key)
             CLAUDE_MODEL: Model name
             SOCRATES_DATA_DIR: Data directory
             SOCRATES_LOG_LEVEL: Logging level
@@ -170,7 +172,8 @@ class SocratesConfig:
         if not api_key and not subscription_token:
             raise ValueError(
                 "No authentication credentials found. "
-                "Set ANTHROPIC_API_KEY, API_KEY_CLAUDE, or ANTHROPIC_SUBSCRIPTION_TOKEN environment variable"
+                "Set ANTHROPIC_API_KEY, API_KEY_CLAUDE, "
+                "or ANTHROPIC_SUBSCRIPTION_TOKEN environment variable"
             )
 
         config_dict = {

@@ -30,6 +30,23 @@ class Event:
             "event_id": self.event_id,
         }
 
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "Event":
+        """Create Event from dictionary."""
+        timestamp = data.get("timestamp")
+        if isinstance(timestamp, str):
+            timestamp = datetime.fromisoformat(timestamp)
+        elif timestamp is None:
+            timestamp = datetime.utcnow()
+
+        return Event(
+            event_type=data["event_type"],
+            source_service=data["source_service"],
+            data=data.get("data", {}),
+            timestamp=timestamp,
+            event_id=data.get("event_id", str(datetime.utcnow().timestamp())),
+        )
+
 
 class EventBus:
     """Central event bus for inter-service communication."""

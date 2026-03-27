@@ -8,7 +8,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class InteractionStatus(str, Enum):
@@ -48,19 +48,8 @@ class WorkflowStatus(str, Enum):
 class Interaction(BaseModel):
     """Record of an agent interaction."""
 
-    interaction_id: str = Field(..., description="Unique interaction ID")
-    agent_name: str = Field(..., description="Name of agent that performed action")
-    agent_type: str = Field(..., description="Type of agent")
-    status: InteractionStatus = Field(default=InteractionStatus.IN_PROGRESS)
-    input_data: Dict[str, Any] = Field(default_factory=dict)
-    output_data: Dict[str, Any] = Field(default_factory=dict)
-    metrics: Dict[str, float] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    duration_ms: Optional[float] = None
-    error_message: Optional[str] = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "interaction_id": "int_12345",
                 "agent_name": "AnalysisAgent",
@@ -73,24 +62,25 @@ class Interaction(BaseModel):
                 "duration_ms": 1234.5,
             }
         }
+    )
+
+    interaction_id: str = Field(..., description="Unique interaction ID")
+    agent_name: str = Field(..., description="Name of agent that performed action")
+    agent_type: str = Field(..., description="Type of agent")
+    status: InteractionStatus = Field(default=InteractionStatus.IN_PROGRESS)
+    input_data: Dict[str, Any] = Field(default_factory=dict)
+    output_data: Dict[str, Any] = Field(default_factory=dict)
+    metrics: Dict[str, float] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    duration_ms: Optional[float] = None
+    error_message: Optional[str] = None
 
 
 class Skill(BaseModel):
     """A skill that an agent has learned."""
 
-    skill_id: str = Field(..., description="Unique skill ID")
-    agent_name: str = Field(..., description="Agent this skill belongs to")
-    skill_name: str = Field(..., description="Name of the skill")
-    skill_type: SkillType = Field(...)
-    description: str = Field(..., description="What this skill does")
-    effectiveness: float = Field(default=0.0, ge=0.0, le=1.0, description="0-1 score")
-    usage_count: int = Field(default=0, description="Times this skill has been used")
-    success_rate: float = Field(default=0.0, ge=0.0, le=1.0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_used_at: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "skill_id": "skill_789",
                 "agent_name": "AnalysisAgent",
@@ -103,20 +93,25 @@ class Skill(BaseModel):
                 "created_at": "2026-03-16T10:00:00",
             }
         }
+    )
+
+    skill_id: str = Field(..., description="Unique skill ID")
+    agent_name: str = Field(..., description="Agent this skill belongs to")
+    skill_name: str = Field(..., description="Name of the skill")
+    skill_type: SkillType = Field(...)
+    description: str = Field(..., description="What this skill does")
+    effectiveness: float = Field(default=0.0, ge=0.0, le=1.0, description="0-1 score")
+    usage_count: int = Field(default=0, description="Times this skill has been used")
+    success_rate: float = Field(default=0.0, ge=0.0, le=1.0)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_used_at: Optional[datetime] = None
 
 
 class Metric(BaseModel):
     """Performance metric."""
 
-    metric_name: str = Field(..., description="Name of metric")
-    metric_type: str = Field(..., description="Type: counter, gauge, histogram")
-    value: float = Field(...)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    service_name: str = Field(..., description="Service that produced this metric")
-    tags: Dict[str, str] = Field(default_factory=dict)
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "metric_name": "api_latency_ms",
                 "metric_type": "histogram",
@@ -126,23 +121,21 @@ class Metric(BaseModel):
                 "tags": {"endpoint": "/execute", "agent": "AnalysisAgent"},
             }
         }
+    )
+
+    metric_name: str = Field(..., description="Name of metric")
+    metric_type: str = Field(..., description="Type: counter, gauge, histogram")
+    value: float = Field(...)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    service_name: str = Field(..., description="Service that produced this metric")
+    tags: Dict[str, str] = Field(default_factory=dict)
 
 
 class Recommendation(BaseModel):
     """A recommendation for agent improvement."""
 
-    recommendation_id: str = Field(...)
-    agent_name: str = Field(...)
-    recommendation_type: str = Field(...)
-    title: str = Field(...)
-    description: str = Field(...)
-    priority: int = Field(ge=1, le=5, description="1=low, 5=critical")
-    confidence: float = Field(ge=0.0, le=1.0)
-    suggested_action: str = Field(...)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "recommendation_id": "rec_123",
                 "agent_name": "AnalysisAgent",
@@ -155,6 +148,17 @@ class Recommendation(BaseModel):
                 "created_at": "2026-03-16T12:34:56",
             }
         }
+    )
+
+    recommendation_id: str = Field(...)
+    agent_name: str = Field(...)
+    recommendation_type: str = Field(...)
+    title: str = Field(...)
+    description: str = Field(...)
+    priority: int = Field(ge=1, le=5, description="1=low, 5=critical")
+    confidence: float = Field(ge=0.0, le=1.0)
+    suggested_action: str = Field(...)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class TimestampedModel(BaseModel):

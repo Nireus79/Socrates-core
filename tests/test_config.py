@@ -15,8 +15,8 @@ class TestSocratesConfig:
 
     def test_config_with_model(self):
         """Test SocratesConfig with custom model."""
-        config = SocratesConfig(api_key="sk-test", claude_model="claude-opus")
-        assert config.claude_model == "claude-opus"
+        config = SocratesConfig(api_key="sk-test", model="claude-opus")
+        assert config.model == "claude-opus"
 
     def test_config_with_log_level(self):
         """Test SocratesConfig with custom log level."""
@@ -25,10 +25,10 @@ class TestSocratesConfig:
 
     def test_config_from_dict(self):
         """Test creating config from dictionary."""
-        data = {"api_key": "sk-test", "claude_model": "claude-opus"}
+        data = {"api_key": "sk-test", "model": "claude-opus"}
         config = SocratesConfig.from_dict(data)
         assert config.api_key == "sk-test"
-        assert config.claude_model == "claude-opus"
+        assert config.model == "claude-opus"
 
     def test_config_from_env(self):
         """Test creating config from environment."""
@@ -45,7 +45,8 @@ class TestSocratesConfig:
         try:
             config = SocratesConfig.from_env()
             assert config.api_key == "sk-test"
-            assert config.claude_model is not None
+            assert config.model is not None
+            assert config.provider == "anthropic"
         finally:
             os.environ.pop("ANTHROPIC_API_KEY", None)
 
@@ -53,7 +54,8 @@ class TestSocratesConfig:
         """Test that config has expected attributes."""
         config = SocratesConfig(api_key="sk-test")
         assert hasattr(config, "api_key")
-        assert hasattr(config, "claude_model")
+        assert hasattr(config, "provider")
+        assert hasattr(config, "model")
         assert hasattr(config, "log_level")
         assert hasattr(config, "max_context_length")
         assert hasattr(config, "max_retries")
@@ -65,7 +67,7 @@ class TestConfigBuilder:
     def test_builder_with_model(self):
         """Test builder with_model method."""
         config = ConfigBuilder("sk-test").with_model("claude-opus").build()
-        assert config.claude_model == "claude-opus"
+        assert config.model == "claude-opus"
 
     def test_builder_with_log_level(self):
         """Test builder with_log_level method."""
@@ -93,7 +95,7 @@ class TestConfigBuilder:
             .build()
         )
         assert config.api_key == "sk-test"
-        assert config.claude_model == "claude-opus"
+        assert config.model == "claude-opus"
         assert config.log_level == "DEBUG"
 
 
@@ -116,8 +118,8 @@ class TestConfigEnvironment:
             # If we got here, it means API key was found somehow (maybe in CI/CD)
             assert config.api_key is not None
         except ValueError as e:
-            # Expected - API key is required
-            assert "credentials" in str(e).lower()
+            # Expected - API key is required (error message contains "api key")
+            assert "api key" in str(e).lower()
 
     def test_env_log_level(self):
         """Test loading log level from environment."""

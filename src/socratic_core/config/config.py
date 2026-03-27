@@ -23,9 +23,16 @@ class SocratesConfig:
     """
     Socrates configuration with sensible defaults and flexible customization.
 
+    Supports multiple LLM providers via socrates-nexus:
+    - Anthropic (Claude)
+    - OpenAI (GPT)
+    - Google (Gemini)
+    - Ollama (local models)
+
     Attributes:
-        api_key: Claude API key (optional for API server mode - uses per-user database keys)
-        claude_model: Claude model to use
+        provider: LLM provider (anthropic, openai, google, ollama)
+        api_key: LLM API key (optional for API server mode)
+        model: Model identifier for the selected provider
         data_dir: Directory for storing projects and databases
         projects_db_path: Path to projects database
         vector_db_path: Path to vector database
@@ -40,14 +47,12 @@ class SocratesConfig:
         custom_knowledge: List of custom knowledge entries
     """
 
-    # API Configuration
-    api_key: Optional[str] = None  # Optional for API server mode (uses per-user database keys)
-    subscription_token: Optional[str] = (
-        None  # Alternative: use Claude subscription instead of API key
-    )
+    # Provider Configuration
+    provider: str = "anthropic"  # anthropic, openai, google, ollama
+    api_key: Optional[str] = None  # LLM API key (optional for API server mode)
 
     # Model Configuration
-    claude_model: str = "claude-haiku-4-5-20251001"
+    model: str = "claude-haiku-4-5-20251001"  # Provider-specific model identifier
     embedding_model: str = "all-MiniLM-L6-v2"
 
     # Storage Configuration
@@ -81,15 +86,21 @@ class SocratesConfig:
         """
         Validate API key configuration.
 
+        For Ollama provider, API key is optional (local). For other providers, it's required.
+
         Raises:
-            ValueError: If API key is None or empty string
+            ValueError: If API key is required but missing
         """
-        # API key is required
+        # Ollama doesn't require API key (local provider)
+        if self.provider == "ollama":
+            return
+
+        # Other providers require API key
         if self.api_key is None or (isinstance(self.api_key, str) and not self.api_key.strip()):
-            if not self.subscription_token:
-                raise ValueError(
-                    "Either 'api_key' or 'subscription_token' is required for configuration"
-                )
+            raise ValueError(
+                f"API key is required for provider '{self.provider}'. "
+                f"Set LLM_API_KEY or provider-specific key environment variable"
+            )
 
     def _ensure_data_dir_is_path(self) -> None:
         """Ensure data_dir is a Path object"""
@@ -142,12 +153,19 @@ class SocratesConfig:
         """
         Create configuration from environment variables.
 
+        Supports multiple LLM providers:
+        - Anthropic: ANTHROPIC_API_KEY, CLAUDE_MODEL
+        - OpenAI: OPENAI_API_KEY, OPENAI_MODEL
+        - Google: GOOGLE_API_KEY, GOOGLE_MODEL
+        - Ollama: OLLAMA_BASE_URL, OLLAMA_MODEL (no API key needed)
+
         Environment variables:
-            ANTHROPIC_API_KEY or API_KEY_CLAUDE: Claude API key
-                (optional - users can provide per-user keys via database)
-            ANTHROPIC_SUBSCRIPTION_TOKEN: Claude subscription token
-                (optional, alternative to API key)
-            CLAUDE_MODEL: Model name
+            LLM_PROVIDER: Provider name (anthropic, openai, google, ollama)
+            LLM_API_KEY: Generic LLM API key
+            LLM_MODEL: Generic model identifier
+            ANTHROPIC_API_KEY: Anthropic-specific key
+            OPENAI_API_KEY: OpenAI-specific key
+            GOOGLE_API_KEY: Google-specific key
             SOCRATES_DATA_DIR: Data directory
             SOCRATES_LOG_LEVEL: Logging level
             SOCRATES_LOG_FILE: Log file path
@@ -158,30 +176,43 @@ class SocratesConfig:
         Returns:
             Configured SocratesConfig instance
         """
+        # Determine provider
+        provider = (
+            overrides.get("provider")
+            or os.getenv("LLM_PROVIDER", "anthropic")
+        )
+
+        # Get API key from generic or provider-specific env vars
         api_key = (
             overrides.get("api_key")
-            or os.getenv("ANTHROPIC_API_KEY")
-            or os.getenv("API_KEY_CLAUDE")
-        )
-        subscription_token = (
-            overrides.get("subscription_token")
-            or os.getenv("ANTHROPIC_SUBSCRIPTION_TOKEN")
+            or os.getenv("LLM_API_KEY")
+            or os.getenv(f"{provider.upper()}_API_KEY")
         )
 
-        # Require either API key or subscription token
-        if not api_key and not subscription_token:
-            raise ValueError(
-                "No authentication credentials found. "
-                "Set ANTHROPIC_API_KEY, API_KEY_CLAUDE, "
-                "or ANTHROPIC_SUBSCRIPTION_TOKEN environment variable"
-            )
+        # Get model from generic or provider-specific env vars
+        model = (
+            overrides.get("model")
+            or os.getenv("LLM_MODEL")
+            or os.getenv(f"{provider.upper()}_MODEL")
+        )
+
+        # Set provider-specific defaults if no model specified
+        if not model:
+            if provider == "anthropic":
+                model = "claude-haiku-4-5-20251001"
+            elif provider == "openai":
+                model = "gpt-4o-mini"
+            elif provider == "google":
+                model = "gemini-2.0-flash"
+            elif provider == "ollama":
+                model = "llama2"
+            else:
+                model = "gpt-4o-mini"  # Safe default
 
         config_dict = {
+            "provider": provider,
             "api_key": api_key,
-            "claude_model": (
-                overrides.get("claude_model")
-                or os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
-            ),
+            "model": model,
             "data_dir": (
                 overrides.get("data_dir")
                 or Path(os.getenv("SOCRATES_DATA_DIR", Path.home() / ".socrates"))
@@ -191,9 +222,6 @@ class SocratesConfig:
                 or os.getenv("SOCRATES_LOG_LEVEL", "INFO")
             ),
         }
-
-        if subscription_token:
-            config_dict["subscription_token"] = subscription_token
 
         log_file = overrides.get("log_file") or os.getenv("SOCRATES_LOG_FILE")
         if log_file:
@@ -209,6 +237,8 @@ class SocratesConfig:
 
         Args:
             config_dict: Dictionary with configuration values
+                Must include: provider, model
+                Must include api_key (except for ollama provider)
 
         Returns:
             Configured SocratesConfig instance
@@ -216,10 +246,21 @@ class SocratesConfig:
         Raises:
             ValueError: If required fields are missing
         """
-        if "api_key" not in config_dict:
-            raise ValueError("api_key is required in configuration")
+        # Make a copy to avoid modifying the original
+        config = dict(config_dict)
 
-        return cls(**config_dict)
+        # Validate required fields
+        if "model" not in config:
+            raise ValueError("model is required in configuration")
+
+        provider = config.get("provider", "anthropic")
+        if provider != "ollama" and "api_key" not in config:
+            raise ValueError(
+                f"api_key is required for provider '{provider}'. "
+                f"Ollama is the only provider that doesn't require an API key"
+            )
+
+        return cls(**config)
 
     def get_legacy_config_dict(self) -> Dict[str, Any]:
         """
@@ -229,10 +270,11 @@ class SocratesConfig:
             Dictionary with legacy config format
         """
         return {
-            "ANTHROPIC_API_KEY": self.api_key,
+            "LLM_PROVIDER": self.provider,
+            "LLM_API_KEY": self.api_key,
             "MAX_CONTEXT_LENGTH": self.max_context_length,
             "EMBEDDING_MODEL": self.embedding_model,
-            "CLAUDE_MODEL": self.claude_model,
+            "LLM_MODEL": self.model,
             "MAX_RETRIES": self.max_retries,
             "RETRY_DELAY": self.retry_delay,
             "TOKEN_WARNING_THRESHOLD": self.token_warning_threshold,
@@ -246,7 +288,8 @@ class SocratesConfig:
         """String representation"""
         return (
             f"SocratesConfig("
-            f"model={self.claude_model}, "
+            f"provider={self.provider}, "
+            f"model={self.model}, "
             f"data_dir={self.data_dir}, "
             f"log_level={self.log_level})"
         )
@@ -256,8 +299,11 @@ class ConfigBuilder:
     """
     Fluent API for building SocratesConfig instances.
 
+    Supports multiple LLM providers (anthropic, openai, google, ollama).
+
     Example:
         config = (ConfigBuilder("sk-...")
+                  .with_provider("anthropic")
                   .with_data_dir("/path")
                   .with_model("claude-opus-4-5-20251101")
                   .build())
@@ -267,14 +313,19 @@ class ConfigBuilder:
         """Initialize builder with API key"""
         self._config_dict: Dict[str, Any] = {"api_key": api_key}
 
+    def with_provider(self, provider: str) -> "ConfigBuilder":
+        """Set LLM provider (anthropic, openai, google, ollama)"""
+        self._config_dict["provider"] = provider
+        return self
+
     def with_data_dir(self, data_dir: Union[str, Path]) -> "ConfigBuilder":
         """Set data directory"""
         self._config_dict["data_dir"] = data_dir
         return self
 
     def with_model(self, model: str) -> "ConfigBuilder":
-        """Set Claude model"""
-        self._config_dict["claude_model"] = model
+        """Set LLM model identifier"""
+        self._config_dict["model"] = model
         return self
 
     def with_embedding_model(self, model: str) -> "ConfigBuilder":
@@ -310,11 +361,6 @@ class ConfigBuilder:
     def with_retry_delay(self, delay: float) -> "ConfigBuilder":
         """Set retry delay"""
         self._config_dict["retry_delay"] = delay
-        return self
-
-    def with_subscription_token(self, token: str) -> "ConfigBuilder":
-        """Set subscription token"""
-        self._config_dict["subscription_token"] = token
         return self
 
     def build(self) -> SocratesConfig:

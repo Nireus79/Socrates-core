@@ -177,9 +177,10 @@ class SocratesConfig:
             Configured SocratesConfig instance
         """
         # Determine provider
-        provider = (
+        provider: str = (
             overrides.get("provider")
             or os.getenv("LLM_PROVIDER", "anthropic")
+            or "anthropic"
         )
 
         # Get API key from generic or provider-specific env vars
@@ -228,7 +229,7 @@ class SocratesConfig:
             config_dict["log_file"] = Path(log_file)
 
         config_dict.update(overrides)
-        return cls(**config_dict)
+        return cls(**config_dict)  # type: ignore[arg-type]
 
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> "SocratesConfig":

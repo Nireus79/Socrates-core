@@ -7,7 +7,7 @@ name = "socratic-core"
 version = "0.1.0"
 description = "Core services for Socratic system: event bus, orchestrator, base services, and shared models"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
     {name = "Socratic Contributors"}

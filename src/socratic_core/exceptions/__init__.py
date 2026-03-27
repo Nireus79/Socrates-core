@@ -1,8 +1,8 @@
 """Exception classes for Socrates core framework"""
 
 from .errors import (
-    APIError,
     AgentError,
+    APIError,
     AuthenticationError,
     ConfigurationError,
     DatabaseError,

@@ -178,9 +178,7 @@ class SocratesConfig:
         """
         # Determine provider
         provider: str = (
-            overrides.get("provider")
-            or os.getenv("LLM_PROVIDER", "anthropic")
-            or "anthropic"
+            overrides.get("provider") or os.getenv("LLM_PROVIDER", "anthropic") or "anthropic"
         )
 
         # Get API key from generic or provider-specific env vars
@@ -218,10 +216,7 @@ class SocratesConfig:
                 overrides.get("data_dir")
                 or Path(os.getenv("SOCRATES_DATA_DIR", Path.home() / ".socrates"))
             ),
-            "log_level": (
-                overrides.get("log_level")
-                or os.getenv("SOCRATES_LOG_LEVEL", "INFO")
-            ),
+            "log_level": (overrides.get("log_level") or os.getenv("SOCRATES_LOG_LEVEL", "INFO")),
         }
 
         log_file = overrides.get("log_file") or os.getenv("SOCRATES_LOG_FILE")

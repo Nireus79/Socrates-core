@@ -88,12 +88,7 @@ class TestConfigBuilder:
 
     def test_builder_multiple_methods(self):
         """Test builder with multiple method calls."""
-        config = (
-            ConfigBuilder("sk-test")
-            .with_model("claude-opus")
-            .with_log_level("DEBUG")
-            .build()
-        )
+        config = ConfigBuilder("sk-test").with_model("claude-opus").with_log_level("DEBUG").build()
         assert config.api_key == "sk-test"
         assert config.model == "claude-opus"
         assert config.log_level == "DEBUG"

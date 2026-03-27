@@ -164,9 +164,7 @@ class TTLCache:
         with self._lock:
             now = datetime.now()
             expired_keys = [
-                key
-                for key, (_, expiry_time) in self._cache.items()
-                if now > expiry_time
+                key for key, (_, expiry_time) in self._cache.items() if now > expiry_time
             ]
 
             for key in expired_keys:

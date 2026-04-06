@@ -29,6 +29,11 @@ from socratic_core.exceptions import (
     ValidationError,
 )
 from socratic_core.orchestrator import ServiceOrchestrator
+from socratic_core.orchestrator_helper import (
+    validate_orchestrator_result,
+    safe_orchestrator_call,
+    get_or_default,
+)
 from socratic_core.service_mesh import (
     HealthStatus,
     LoadBalancer,
@@ -60,6 +65,7 @@ from socratic_core.utils import (
     deserialize_datetime,
     serialize_datetime,
 )
+from socratic_core.utils.project_templates import ProjectTemplateGenerator
 
 __version__ = "0.2.0"
 
@@ -99,6 +105,12 @@ __all__ = [
     "EventBus",
     "EventEmitter",
     "EventType",
+    # Orchestrator Helpers
+    "validate_orchestrator_result",
+    "safe_orchestrator_call",
+    "get_or_default",
+    # Project Templates
+    "ProjectTemplateGenerator",
     # Exceptions
     "SocratesError",
     "ConfigurationError",

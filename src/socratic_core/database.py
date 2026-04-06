@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from .connection_pool import SQLiteConnectionPool
 
 
 class DatabaseClient(ABC):
@@ -70,34 +71,72 @@ class DatabaseClient(ABC):
 class SQLiteClient(DatabaseClient):
     """SQLite implementation of DatabaseClient."""
 
-    def __init__(self, db_path: str = ":memory:"):
+    def __init__(
+        self,
+        db_path: str = ":memory:",
+        pool_enabled: bool = True,
+        pool_size: int = 5,
+        max_overflow: int = 3,
+        pool_timeout: float = 30.0,
+    ):
         """
         Initialize SQLite client.
 
         Args:
             db_path: Path to SQLite database file or ":memory:" for in-memory DB
+            pool_enabled: Enable connection pooling
+            pool_size: Number of connections in pool
+            max_overflow: Maximum connections above pool_size
+            pool_timeout: Timeout for acquiring connection from pool
         """
         self.db_path = db_path
         self.connection: Optional[sqlite3.Connection] = None
+        self.pool_enabled = pool_enabled
+        self.pool: Optional[SQLiteConnectionPool] = None
+        self.pool_size = pool_size
+        self.max_overflow = max_overflow
+        self.pool_timeout = pool_timeout
 
     async def connect(self) -> None:
         """Establish SQLite connection."""
-        if self.db_path == ":memory:":
-            self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
-        else:
+        if not self.db_path.startswith(":memory:"):
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-            self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
 
-        if self.connection:
-            self.connection.row_factory = sqlite3.Row
-            # Enable foreign keys
-            self.connection.execute("PRAGMA foreign_keys = ON")
+        if self.pool_enabled and self.db_path != ":memory:":
+            # Use connection pooling
+            self.pool = SQLiteConnectionPool(
+                db_path=self.db_path,
+                pool_size=self.pool_size,
+                max_overflow=self.max_overflow,
+                timeout=self.pool_timeout,
+                echo=False,
+            )
+            await self.pool.initialize()
+            # Get one connection for schema initialization
+            async with self.pool.get_connection() as conn:
+                self.connection = conn
+        else:
+            # Use single connection (in-memory or pool disabled)
+            self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
+            if self.connection:
+                self.connection.row_factory = sqlite3.Row
+                self.connection.execute("PRAGMA foreign_keys = ON")
+                self.connection.execute("PRAGMA journal_mode = WAL")
 
     async def disconnect(self) -> None:
         """Close SQLite connection."""
-        if self.connection:
+        if self.pool:
+            await self.pool.close_all()
+            self.pool = None
+        elif self.connection:
             self.connection.close()
-            self.connection = None
+        self.connection = None
+
+    def get_pool_stats(self) -> Dict[str, Any]:
+        """Get connection pool statistics."""
+        if self.pool:
+            return self.pool.get_stats()
+        return {"pool_enabled": False}
 
     async def initialize_schema(self) -> None:
         """Initialize database schema for all Socratic entities."""

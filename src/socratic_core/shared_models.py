@@ -172,3 +172,106 @@ class IdentifiedModel(BaseModel):
     """Base model with ID field."""
 
     id: str = Field(..., description="Unique identifier")
+
+
+class User(BaseModel):
+    """User representation across all Socratic services."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "user_id": "usr_12345",
+                "username": "john_doe",
+                "email": "john@example.com",
+                "subscription_tier": "pro",
+                "created_at": "2026-03-16T10:00:00",
+                "updated_at": "2026-03-16T12:00:00",
+            }
+        }
+    )
+
+    user_id: str = Field(..., description="Unique user ID")
+    username: str = Field(..., description="Unique username")
+    email: Optional[str] = Field(None, description="User email")
+    subscription_tier: str = Field(default="free", description="free, pro, enterprise")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Project(BaseModel):
+    """Project representation across all Socratic services."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "project_id": "proj_12345",
+                "user_id": "usr_12345",
+                "name": "E-Commerce Platform",
+                "phase": "discovery",
+                "description": "Building an e-commerce platform",
+                "created_at": "2026-03-16T10:00:00",
+                "updated_at": "2026-03-16T12:00:00",
+            }
+        }
+    )
+
+    project_id: str = Field(..., description="Unique project ID")
+    user_id: str = Field(..., description="Owner user ID")
+    name: str = Field(..., description="Project name")
+    phase: str = Field(default="discovery", description="discovery, analysis, design, implementation")
+    description: Optional[str] = Field(None, description="Project description")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Session(BaseModel):
+    """Session representation across all Socratic services."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "session_id": "sess_12345",
+                "user_id": "usr_12345",
+                "project_id": "proj_12345",
+                "started_at": "2026-03-16T10:00:00",
+                "ended_at": "2026-03-16T12:00:00",
+            }
+        }
+    )
+
+    session_id: str = Field(..., description="Unique session ID")
+    user_id: str = Field(..., description="User ID")
+    project_id: Optional[str] = Field(None, description="Project ID if session is project-specific")
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    ended_at: Optional[datetime] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Question(BaseModel):
+    """Question representation for Socratic Counselor."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "question_id": "q_12345",
+                "project_id": "proj_12345",
+                "phase": "discovery",
+                "question": "What are the main requirements for your system?",
+                "status": "unanswered",
+                "answer": None,
+                "created_at": "2026-03-16T10:00:00",
+            }
+        }
+    )
+
+    question_id: str = Field(..., description="Unique question ID")
+    project_id: str = Field(..., description="Project ID")
+    phase: str = Field(..., description="Phase this question belongs to")
+    question: str = Field(..., description="The question text")
+    status: str = Field(default="unanswered", description="unanswered, answered, skipped")
+    answer: Optional[str] = Field(None, description="User's answer")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    answered_at: Optional[datetime] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)

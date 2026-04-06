@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "socratic-core"
-version = "0.1.2"
-description = "Core services for Socratic system: event bus, orchestrator, base services, and shared models"
+version = "0.2.0"
+description = "Core services for Socratic system: event bus, orchestrator, base services, shared models, and database layer"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}

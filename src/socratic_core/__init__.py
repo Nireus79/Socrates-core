@@ -10,6 +10,7 @@ Core components:
 
 from socratic_core.base_service import BaseService
 from socratic_core.config import ConfigBuilder, SocratesConfig
+from socratic_core.database import DatabaseClient, PostgresClient, SQLiteClient
 from socratic_core.event_bus import Event, EventBus
 from socratic_core.events import EventEmitter, EventType
 from socratic_core.exceptions import (
@@ -29,10 +30,14 @@ from socratic_core.shared_models import (
     Interaction,
     InteractionStatus,
     Metric,
+    Project,
+    Question,
     Recommendation,
+    Session,
     Skill,
     SkillType,
     TimestampedModel,
+    User,
     WorkflowStatus,
 )
 from socratic_core.utils import (
@@ -44,7 +49,7 @@ from socratic_core.utils import (
     serialize_datetime,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     # Configuration
@@ -53,6 +58,10 @@ __all__ = [
     # Service layer
     "BaseService",
     "ServiceOrchestrator",
+    # Database
+    "DatabaseClient",
+    "SQLiteClient",
+    "PostgresClient",
     # Event system
     "Event",
     "EventBus",
@@ -79,6 +88,10 @@ __all__ = [
     "Recommendation",
     "TimestampedModel",
     "IdentifiedModel",
+    "User",
+    "Project",
+    "Session",
+    "Question",
     # Utilities
     "serialize_datetime",
     "deserialize_datetime",

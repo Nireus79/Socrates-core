@@ -13,6 +13,7 @@ from socratic_core.config import ConfigBuilder, SocratesConfig
 from socratic_core.database import DatabaseClient, PostgresClient, SQLiteClient
 from socratic_core.connection_pool import ConnectionPool, SQLiteConnectionPool, PostgresConnectionPool
 from socratic_core.migrations import MigrationRunner, Migration, get_default_migrations, MigrationError
+from socratic_core.multi_env_config import EnvironmentManager, EnvironmentProfile, Environment
 from socratic_core.event_bus import Event, EventBus
 from socratic_core.events import EventEmitter, EventType
 from socratic_core.exceptions import (
@@ -87,6 +88,10 @@ __all__ = [
     "Migration",
     "MigrationError",
     "get_default_migrations",
+    # Multi-Environment Configuration
+    "EnvironmentManager",
+    "EnvironmentProfile",
+    "Environment",
     # Event system
     "Event",
     "EventBus",

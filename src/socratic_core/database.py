@@ -438,9 +438,15 @@ class SQLiteClient(DatabaseClient):
         if where_clauses:
             query += " WHERE " + " AND ".join(where_clauses)
 
+        # Validate and add LIMIT/OFFSET safely
+        # LIMIT and OFFSET must be integers to prevent SQL injection
         if limit:
+            if not isinstance(limit, int) or limit < 0:
+                raise ValueError("LIMIT must be a non-negative integer")
             query += f" LIMIT {limit}"
         if offset:
+            if not isinstance(offset, int) or offset < 0:
+                raise ValueError("OFFSET must be a non-negative integer")
             query += f" OFFSET {offset}"
 
         cursor.execute(query, params)

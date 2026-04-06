@@ -8,6 +8,7 @@ Core components:
 - Shared Models: Common data structures used across services
 """
 
+from socratic_core.agent_orchestrator import AgentOrchestrator
 from socratic_core.base_service import BaseService
 from socratic_core.config import ConfigBuilder, SocratesConfig
 from socratic_core.database import DatabaseClient, PostgresClient, SQLiteClient
@@ -68,6 +69,7 @@ __all__ = [
     "ConfigBuilder",
     # Service layer
     "BaseService",
+    "AgentOrchestrator",
     "ServiceOrchestrator",
     # Service Mesh
     "ServiceMesh",

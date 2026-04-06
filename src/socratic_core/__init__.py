@@ -25,6 +25,14 @@ from socratic_core.exceptions import (
     ValidationError,
 )
 from socratic_core.orchestrator import ServiceOrchestrator
+from socratic_core.service_mesh import (
+    HealthStatus,
+    LoadBalancer,
+    ServiceInstance,
+    ServiceMesh,
+    ServiceMeshProxy,
+    ServiceMetadata,
+)
 from socratic_core.shared_models import (
     IdentifiedModel,
     Interaction,
@@ -58,6 +66,13 @@ __all__ = [
     # Service layer
     "BaseService",
     "ServiceOrchestrator",
+    # Service Mesh
+    "ServiceMesh",
+    "ServiceMeshProxy",
+    "LoadBalancer",
+    "ServiceInstance",
+    "ServiceMetadata",
+    "HealthStatus",
     # Database
     "DatabaseClient",
     "SQLiteClient",

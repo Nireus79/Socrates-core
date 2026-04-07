@@ -1,7 +1,6 @@
 """Distributed tracing support for Socratic Core."""
 
 import logging
-import time
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -179,7 +178,9 @@ class Tracer:
 
         self.logger.debug(f"Ended span {span_id} with status {status}")
 
-    def add_event(self, span_id: str, name: str, attributes: Optional[Dict[str, Any]] = None) -> None:
+    def add_event(
+        self, span_id: str, name: str, attributes: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Add event to span."""
         if span_id in self.spans:
             self.spans[span_id].add_event(name, attributes)
@@ -190,7 +191,9 @@ class Tracer:
             self.spans[span_id].set_attribute(key, value)
 
     @contextmanager
-    def span(self, name: str, attributes: Optional[Dict[str, Any]] = None) -> Generator[str, None, None]:
+    def span(
+        self, name: str, attributes: Optional[Dict[str, Any]] = None
+    ) -> Generator[str, None, None]:
         """
         Context manager for spans.
 
@@ -219,10 +222,7 @@ class Tracer:
         Returns:
             Trace data with all spans
         """
-        trace_spans = [
-            span.to_dict() for span in self.spans.values()
-            if span.trace_id == trace_id
-        ]
+        trace_spans = [span.to_dict() for span in self.spans.values() if span.trace_id == trace_id]
 
         return {
             "trace_id": trace_id,
@@ -245,32 +245,36 @@ class Tracer:
 
         spans = []
         for span_dict in trace["spans"]:
-            spans.append({
-                "traceID": trace_id,
-                "spanID": span_dict["span_id"],
-                "operationName": span_dict["name"],
-                "references": [
-                    {
-                        "refType": "CHILD_OF",
-                        "traceID": trace_id,
-                        "spanID": span_dict["parent_span_id"],
-                    }
-                ] if span_dict["parent_span_id"] else [],
-                "startTime": int(
-                    datetime.fromisoformat(span_dict["start_time"]).timestamp() * 1_000_000
-                ),
-                "duration": int(span_dict["duration_ms"] * 1000),
-                "tags": span_dict["attributes"],
-                "logs": [
-                    {
-                        "timestamp": int(
-                            event["timestamp"].timestamp() * 1_000_000
-                        ),
-                        "fields": {"message": event["name"]},
-                    }
-                    for event in span_dict["events"]
-                ],
-            })
+            spans.append(
+                {
+                    "traceID": trace_id,
+                    "spanID": span_dict["span_id"],
+                    "operationName": span_dict["name"],
+                    "references": (
+                        [
+                            {
+                                "refType": "CHILD_OF",
+                                "traceID": trace_id,
+                                "spanID": span_dict["parent_span_id"],
+                            }
+                        ]
+                        if span_dict["parent_span_id"]
+                        else []
+                    ),
+                    "startTime": int(
+                        datetime.fromisoformat(span_dict["start_time"]).timestamp() * 1_000_000
+                    ),
+                    "duration": int(span_dict["duration_ms"] * 1000),
+                    "tags": span_dict["attributes"],
+                    "logs": [
+                        {
+                            "timestamp": int(event["timestamp"].timestamp() * 1_000_000),
+                            "fields": {"message": event["name"]},
+                        }
+                        for event in span_dict["events"]
+                    ],
+                }
+            )
 
         return {
             "batches": [

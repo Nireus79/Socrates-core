@@ -1,11 +1,11 @@
 """Multi-environment configuration management for dev/staging/production."""
 
-import os
 import json
 import logging
-from typing import Dict, Any, Optional
+import os
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +178,7 @@ class EnvironmentManager:
 
         for key, value in os.environ.items():
             if key.startswith(prefix):
-                secret_key = key[len(prefix):].lower()
+                secret_key = key[len(prefix) :].lower()
                 self._secret_store[secret_key] = value
                 loaded[secret_key] = value
 
@@ -196,7 +196,7 @@ class EnvironmentManager:
             Dictionary of secrets loaded
         """
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 secrets = json.load(f)
 
             self._secret_store.update(secrets)

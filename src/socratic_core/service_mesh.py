@@ -170,11 +170,7 @@ class ServiceMesh:
         if service_name not in self.instances:
             return []
 
-        return [
-            i
-            for i in self.instances[service_name]
-            if i.health_status == HealthStatus.HEALTHY
-        ]
+        return [i for i in self.instances[service_name] if i.health_status == HealthStatus.HEALTHY]
 
     def get_available_instances(self, service_name: str) -> List[ServiceInstance]:
         """Get available instances (healthy + degraded)."""
@@ -310,19 +306,18 @@ class LoadBalancer:
 
         elif strategy == "random":
             import random
+
             return random.choice(available)
 
         elif strategy == "weighted":
             # Weighted by inverse of error rate
-            weights = [
-                max(1 - i.get_error_rate(), 0.1) * i.service.weight
-                for i in available
-            ]
+            weights = [max(1 - i.get_error_rate(), 0.1) * i.service.weight for i in available]
             total = sum(weights)
             if total == 0:
                 return available[0]
 
             import random
+
             r = random.uniform(0, total)
             current = 0
             for instance, weight in zip(available, weights):
@@ -397,7 +392,7 @@ class ServiceMeshProxy:
                 is_error=False,
             )
             return response
-        except Exception as e:
+        except Exception:
             duration = (time.time() - start) * 1000
             self.mesh.record_request(
                 service_name,

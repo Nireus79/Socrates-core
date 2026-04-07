@@ -1,7 +1,6 @@
 """Tests for socratic_core.utils module."""
 
 import time
-from datetime import datetime
 
 import pytest
 
@@ -163,6 +162,7 @@ class TestCachedDecorator:
 
     def test_cached_preserves_function_name(self):
         """Test that decorator preserves function name."""
+
         @cached(ttl=60)
         def my_function():
             return 42

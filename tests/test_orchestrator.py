@@ -1,7 +1,8 @@
 """Unit tests for ServiceOrchestrator."""
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock
 
 from socratic_core.base_service import BaseService
 from socratic_core.orchestrator import ServiceOrchestrator

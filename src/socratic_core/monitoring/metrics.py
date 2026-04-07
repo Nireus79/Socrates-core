@@ -4,7 +4,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -268,12 +268,10 @@ class MetricsRegistry:
                     bucket_str = "+Inf"
                 else:
                     bucket_str = str(bucket)
-                lines.append(
-                    f'{histogram.name}_bucket{{le="{bucket_str}"{labels_str}}} {count}'
-                )
+                lines.append(f'{histogram.name}_bucket{{le="{bucket_str}"{labels_str}}} {count}')
 
-            lines.append(f'{histogram.name}_sum{labels_str} {histogram.sum}')
-            lines.append(f'{histogram.name}_count{labels_str} {histogram.count}')
+            lines.append(f"{histogram.name}_sum{labels_str} {histogram.sum}")
+            lines.append(f"{histogram.name}_count{labels_str} {histogram.count}")
 
         return "\n".join(lines)
 

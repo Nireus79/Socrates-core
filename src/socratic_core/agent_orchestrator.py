@@ -84,7 +84,9 @@ class AgentOrchestrator:
 
         # Emit registration event if event bus available
         if self.event_bus:
-            self.event_bus.emit("agent_registered", {"agent_name": name, "description": description})
+            self.event_bus.emit(
+                "agent_registered", {"agent_name": name, "description": description}
+            )
 
     def register_lazy_agent(
         self,
@@ -163,7 +165,9 @@ class AgentOrchestrator:
         try:
             # Emit pre-request event
             if self.event_bus:
-                self.event_bus.emit("agent_request_start", {"agent": agent_name, "request": request})
+                self.event_bus.emit(
+                    "agent_request_start", {"agent": agent_name, "request": request}
+                )
 
             # Call agent's process method
             if hasattr(agent, "process"):
@@ -178,7 +182,9 @@ class AgentOrchestrator:
 
             # Emit post-request event
             if self.event_bus:
-                self.event_bus.emit("agent_request_complete", {"agent": agent_name, "result": result})
+                self.event_bus.emit(
+                    "agent_request_complete", {"agent": agent_name, "result": result}
+                )
 
             return result
 

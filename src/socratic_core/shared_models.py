@@ -219,7 +219,9 @@ class Project(BaseModel):
     project_id: str = Field(..., description="Unique project ID")
     user_id: str = Field(..., description="Owner user ID")
     name: str = Field(..., description="Project name")
-    phase: str = Field(default="discovery", description="discovery, analysis, design, implementation")
+    phase: str = Field(
+        default="discovery", description="discovery, analysis, design, implementation"
+    )
     description: Optional[str] = Field(None, description="Project description")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

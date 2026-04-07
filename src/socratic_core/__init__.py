@@ -11,10 +11,12 @@ Core components:
 from socratic_core.agent_orchestrator import AgentOrchestrator
 from socratic_core.base_service import BaseService
 from socratic_core.config import ConfigBuilder, SocratesConfig
+from socratic_core.connection_pool import (
+    ConnectionPool,
+    PostgresConnectionPool,
+    SQLiteConnectionPool,
+)
 from socratic_core.database import DatabaseClient, PostgresClient, SQLiteClient
-from socratic_core.connection_pool import ConnectionPool, SQLiteConnectionPool, PostgresConnectionPool
-from socratic_core.migrations import MigrationRunner, Migration, get_default_migrations, MigrationError
-from socratic_core.multi_env_config import EnvironmentManager, EnvironmentProfile, Environment
 from socratic_core.event_bus import Event, EventBus
 from socratic_core.events import EventEmitter, EventType
 from socratic_core.exceptions import (
@@ -28,11 +30,18 @@ from socratic_core.exceptions import (
     UserNotFoundError,
     ValidationError,
 )
+from socratic_core.migrations import (
+    Migration,
+    MigrationError,
+    MigrationRunner,
+    get_default_migrations,
+)
+from socratic_core.multi_env_config import Environment, EnvironmentManager, EnvironmentProfile
 from socratic_core.orchestrator import ServiceOrchestrator
 from socratic_core.orchestrator_helper import (
-    validate_orchestrator_result,
-    safe_orchestrator_call,
     get_or_default,
+    safe_orchestrator_call,
+    validate_orchestrator_result,
 )
 from socratic_core.service_mesh import (
     HealthStatus,

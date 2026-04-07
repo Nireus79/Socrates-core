@@ -3,8 +3,8 @@
 import pytest
 
 from socratic_core.exceptions import (
-    APIError,
     AgentError,
+    APIError,
     AuthenticationError,
     ConfigurationError,
     DatabaseError,

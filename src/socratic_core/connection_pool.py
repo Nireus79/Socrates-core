@@ -1,12 +1,12 @@
 """Connection pooling for efficient database resource management."""
 
 import asyncio
-import sqlite3
 import logging
+import sqlite3
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, Any
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -100,14 +100,13 @@ class ConnectionPool:
                 conn = self.create_connection_func()
                 self._stats.total_connections += 1
                 if self.echo:
-                    logger.debug(f"Created overflow connection. Total: {self._stats.total_connections}")
+                    logger.debug(
+                        f"Created overflow connection. Total: {self._stats.total_connections}"
+                    )
             else:
                 # Wait for available connection
                 try:
-                    conn = await asyncio.wait_for(
-                        self._available.get(),
-                        timeout=timeout
-                    )
+                    conn = await asyncio.wait_for(self._available.get(), timeout=timeout)
                 except asyncio.TimeoutError:
                     raise TimeoutError(f"Could not acquire connection within {timeout}s")
 
@@ -127,11 +126,13 @@ class ConnectionPool:
                 self._available.put_nowait(conn)
             except asyncio.QueueFull:
                 # Connection was overflow, close it
-                if hasattr(conn, 'close'):
+                if hasattr(conn, "close"):
                     conn.close()
                 self._stats.total_connections -= 1
                 if self.echo:
-                    logger.debug(f"Closed overflow connection. Total: {self._stats.total_connections}")
+                    logger.debug(
+                        f"Closed overflow connection. Total: {self._stats.total_connections}"
+                    )
 
             self._stats.idle_connections = self._available.qsize()
             self._stats.total_releases += 1
@@ -143,14 +144,14 @@ class ConnectionPool:
             while not self._available.empty():
                 try:
                     conn = self._available.get_nowait()
-                    if hasattr(conn, 'close'):
+                    if hasattr(conn, "close"):
                         conn.close()
                 except asyncio.QueueEmpty:
                     break
 
             # Close in-use connections
             for conn in self._in_use.copy():
-                if hasattr(conn, 'close'):
+                if hasattr(conn, "close"):
                     conn.close()
 
             self._in_use.clear()

@@ -1,10 +1,9 @@
 """Database migration utilities for schema versioning."""
 
-import os
+import logging
 import sqlite3
 from datetime import datetime
-from typing import Dict, List, Optional, Callable
-import logging
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +53,7 @@ class MigrationRunner:
     def _ensure_migrations_table(self, conn: sqlite3.Connection) -> None:
         """Ensure migrations tracking table exists."""
         cursor = conn.cursor()
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS __migrations__ (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 version TEXT NOT NULL UNIQUE,
@@ -63,8 +61,7 @@ class MigrationRunner:
                 applied_at TEXT NOT NULL,
                 duration_ms REAL NOT NULL
             )
-            """
-        )
+            """)
         conn.commit()
 
     def register_migration(self, migration: Migration) -> None:
@@ -192,9 +189,11 @@ class MigrationRunner:
             )
             conn.commit()
 
-            logger.info(
-                f"Reverted migration {migration.version}: {migration.description} ({duration:.2f}ms)"
+            msg = (
+                f"Reverted migration {migration.version}: "
+                f"{migration.description} ({duration:.2f}ms)"
             )
+            logger.info(msg)
             return duration
 
         except Exception as e:

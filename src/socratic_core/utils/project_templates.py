@@ -453,7 +453,8 @@ Version 2.0, January 2004
         """Generate CONTRIBUTING.md guidelines."""
         return f"""# Contributing to {project_name}
 
-Thank you for your interest in contributing to {project_name}! We welcome contributions from everyone.
+Thank you for your interest in contributing to {project_name}!
+We welcome contributions from everyone.
 
 ## How to Contribute
 

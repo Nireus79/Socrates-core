@@ -2,10 +2,9 @@
 Tests for database client implementations.
 """
 
-import asyncio
 import pytest
 
-from socratic_core.database import SQLiteClient, DatabaseClient
+from socratic_core.database import DatabaseClient, SQLiteClient
 
 
 @pytest.fixture

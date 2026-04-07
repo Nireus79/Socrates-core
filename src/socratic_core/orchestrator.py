@@ -46,6 +46,11 @@ class ServiceOrchestrator:
         self._started_services: List[str] = []
         self.logger = logging.getLogger("socrates.orchestrator")
 
+    @property
+    def services(self) -> Dict[str, BaseService]:
+        """Get registered services."""
+        return self._services
+
     def register_service(self, service: BaseService) -> None:
         """
         Register a service with the orchestrator.
@@ -64,31 +69,58 @@ class ServiceOrchestrator:
 
         self.logger.debug(f"Registered service: {service.service_name}")
 
+    async def start_service(self, service_name: str) -> None:
+        """
+        Start a single service.
+
+        Args:
+            service_name: Name of the service to start
+        """
+        if service_name not in self._services:
+            raise ValueError(f"Service {service_name} not registered")
+
+        if service_name in self._started_services:
+            self.logger.debug(f"Service {service_name} already started")
+            return
+
+        # Check dependencies are started
+        deps = self.DEPENDENCIES.get(service_name, [])
+        for dep in deps:
+            if dep not in self._started_services:
+                self.logger.error(f"Cannot start {service_name}: dependency {dep} not started")
+                raise RuntimeError(f"Dependency {dep} not started for service {service_name}")
+
+        service = self._services[service_name]
+        try:
+            await service.initialize()
+            self._started_services.append(service_name)
+            self.logger.info(f"Started service: {service_name}")
+        except Exception as e:
+            self.logger.error(f"Failed to start {service_name}: {e}")
+            raise
+
     async def start_all_services(self) -> None:
         """Start all registered services in dependency order."""
         self._started_services = []
         self.logger.info("Starting all services...")
 
-        # Start services in order
+        # Determine which services to start
+        # Use STARTUP_ORDER for known services, then add any remaining registered services
+        services_to_start = []
         for service_name in self.STARTUP_ORDER:
-            if service_name not in self._services:
-                self.logger.debug(f"Service {service_name} not registered, skipping")
-                continue
+            if service_name in self._services:
+                services_to_start.append(service_name)
 
-            # Check dependencies are started
-            deps = self.DEPENDENCIES.get(service_name, [])
-            for dep in deps:
-                if dep not in self._started_services:
-                    self.logger.error(f"Cannot start {service_name}: dependency {dep} not started")
-                    raise RuntimeError(f"Dependency {dep} not started for service {service_name}")
+        # Add any services that aren't in the default order
+        for service_name in self._services:
+            if service_name not in services_to_start:
+                services_to_start.append(service_name)
 
-            service = self._services[service_name]
+        # Start services in order
+        for service_name in services_to_start:
             try:
-                await service.initialize()
-                self._started_services.append(service_name)
-                self.logger.info(f"Started service: {service_name}")
-            except Exception as e:
-                self.logger.error(f"Failed to start {service_name}: {e}")
+                await self.start_service(service_name)
+            except RuntimeError:
                 raise
 
         # Publish system started event
@@ -97,31 +129,62 @@ class ServiceOrchestrator:
         )
         self.logger.info(f"All services started: {', '.join(self._started_services)}")
 
+    async def start_all(self) -> None:
+        """Alias for start_all_services()."""
+        await self.start_all_services()
+
+    async def stop_service(self, service_name: str) -> None:
+        """
+        Stop a single service.
+
+        Args:
+            service_name: Name of the service to stop
+        """
+        if service_name not in self._services:
+            raise RuntimeError(f"Service {service_name} not registered")
+
+        if service_name not in self._started_services:
+            self.logger.debug(f"Service {service_name} not running")
+            return
+
+        service = self._services[service_name]
+        try:
+            await service.shutdown()
+            self._started_services.remove(service_name)
+            self.logger.info(f"Stopped service: {service_name}")
+        except Exception as e:
+            self.logger.error(f"Error stopping {service_name}: {e}")
+            raise
+
     async def stop_all_services(self) -> None:
         """Stop all registered services in reverse dependency order."""
         self.logger.info("Stopping all services...")
 
-        # Reverse the startup order for shutdown
-        shutdown_order = list(reversed(self.STARTUP_ORDER))
+        # Determine which services to stop
+        # Use reverse STARTUP_ORDER for known services, then add remaining in registration order
+        services_to_stop = []
+        for service_name in reversed(self.STARTUP_ORDER):
+            if service_name in self._services and service_name in self._started_services:
+                services_to_stop.append(service_name)
 
-        for service_name in shutdown_order:
-            if service_name not in self._services:
-                continue
+        # Add any services that aren't in the default order
+        for service_name in reversed(list(self._services.keys())):
+            if service_name not in services_to_stop and service_name in self._started_services:
+                services_to_stop.append(service_name)
 
-            if service_name not in self._started_services:
-                continue
-
-            service = self._services[service_name]
+        for service_name in services_to_stop:
             try:
-                await service.shutdown()
-                self._started_services.remove(service_name)
-                self.logger.info(f"Stopped service: {service_name}")
-            except Exception as e:
-                self.logger.error(f"Error stopping {service_name}: {e}")
+                await self.stop_service(service_name)
+            except RuntimeError:
+                pass  # Continue shutdown even if one service fails
 
         # Publish system stopped event
         await self.event_bus.publish("system_stopped", "orchestrator", {"services": []})
         self.logger.info("All services stopped")
+
+    async def stop_all(self) -> None:
+        """Alias for stop_all_services()."""
+        await self.stop_all_services()
 
     async def get_service(self, service_name: str) -> Optional[BaseService]:
         """
@@ -164,6 +227,41 @@ class ServiceOrchestrator:
         self.logger.debug(f"Calling {service_name}.{method_name}")
         return await method(*args, **kwargs)
 
+    async def health_check_service(self, service_name: str) -> Dict[str, Any]:
+        """
+        Check health of a single service.
+
+        Args:
+            service_name: Name of the service to check
+
+        Returns:
+            Dictionary with health status
+        """
+        if service_name not in self._services:
+            raise RuntimeError(f"Service {service_name} not registered")
+
+        service = self._services[service_name]
+        is_running = service_name in self._started_services
+        try:
+            health = await service.health_check()
+            # Extract status from health dict if present
+            health_status = health.get("status", "healthy") if isinstance(health, dict) else "healthy"
+            return {
+                "status": health_status,
+                "running": is_running,
+                "details": health,
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "running": False,
+                "error": str(e),
+            }
+
+    async def health_check(self, service_name: str) -> Dict[str, Any]:
+        """Alias for health_check_service()."""
+        return await self.health_check_service(service_name)
+
     async def health_check_all(self) -> Dict[str, Any]:
         """
         Check health of all services.
@@ -172,40 +270,44 @@ class ServiceOrchestrator:
             Dictionary with health status of each service
         """
         health_status = {}
-        system_healthy = True
 
-        for service_name, service in self._services.items():
-            try:
-                health = await service.health_check()
-                is_running = service_name in self._started_services
-                health_status[service_name] = {
-                    "status": "healthy" if is_running else "stopped",
-                    "running": is_running,
-                    "details": health,
-                }
-            except Exception as e:
-                health_status[service_name] = {
-                    "status": "unhealthy",
-                    "running": False,
-                    "error": str(e),
-                }
-                system_healthy = False
+        for service_name in self._services.keys():
+            health_result = await self.health_check_service(service_name)
+            health_status[service_name] = health_result
 
-        return {
-            "overall_status": "healthy" if system_healthy else "unhealthy",
-            "services": health_status,
-            "started_services": self._started_services,
-        }
+        return health_status
 
-    def get_service_status(self) -> Dict[str, Any]:
-        """Get status of all services."""
-        return {
-            service_name: {
+    def get_service_status(self, service_name: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get status of a single service or all services.
+
+        Args:
+            service_name: Optional name of specific service. If None, returns status of all.
+
+        Returns:
+            Dictionary with service status information
+        """
+        if service_name:
+            if service_name not in self._services:
+                raise ValueError(f"Service {service_name} not registered")
+            service = self._services[service_name]
+            return {
+                "name": service_name,
                 "class": service.__class__.__name__,
-                "running": service_name in self._started_services,
+                "status": "running" if service_name in self._started_services else "stopped",
             }
-            for service_name, service in self._services.items()
-        }
+        else:
+            return {
+                service_name: {
+                    "class": service.__class__.__name__,
+                    "status": "running" if service_name in self._started_services else "stopped",
+                }
+                for service_name, service in self._services.items()
+            }
+
+    def get_all_services_status(self) -> Dict[str, Any]:
+        """Alias for get_service_status() to get status of all services."""
+        return self.get_service_status()
 
     def list_services(self) -> Dict[str, str]:
         """List all registered services."""

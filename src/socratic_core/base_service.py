@@ -28,6 +28,11 @@ class BaseService(ABC):
         self.last_health_check = None
         self.orchestrator = None  # Injected by ServiceOrchestrator
 
+    @property
+    def name(self) -> str:
+        """Alias for service_name for backward compatibility."""
+        return self.service_name
+
     @abstractmethod
     async def initialize(self) -> None:
         """Initialize service - called once on startup."""

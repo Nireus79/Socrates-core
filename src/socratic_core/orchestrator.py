@@ -245,7 +245,9 @@ class ServiceOrchestrator:
         try:
             health = await service.health_check()
             # Extract status from health dict if present
-            health_status = health.get("status", "healthy") if isinstance(health, dict) else "healthy"
+            health_status = (
+                health.get("status", "healthy") if isinstance(health, dict) else "healthy"
+            )
             return {
                 "status": health_status,
                 "running": is_running,

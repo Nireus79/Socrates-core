@@ -9,6 +9,7 @@ Core components:
 """
 
 from socratic_core.agent_orchestrator import AgentOrchestrator
+from socratic_core.agents import Agent
 from socratic_core.base_service import BaseService
 from socratic_core.config import ConfigBuilder, SocratesConfig
 from socratic_core.connection_pool import (
@@ -82,9 +83,11 @@ __all__ = [
     # Configuration
     "SocratesConfig",
     "ConfigBuilder",
+    # Agent system
+    "Agent",
+    "AgentOrchestrator",
     # Service layer
     "BaseService",
-    "AgentOrchestrator",
     "ServiceOrchestrator",
     # Service Mesh
     "ServiceMesh",

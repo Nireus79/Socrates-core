@@ -88,5 +88,12 @@ class EventType(Enum):
     COLLABORATOR_ADDED = "collaborator.added"
     COLLABORATOR_REMOVED = "collaborator.removed"
 
+    # Learning & Feedback events
+    LEARNING_STARTED = "learning.started"
+    LEARNING_COMPLETED = "learning.completed"
+    PATTERN_DETECTED = "pattern.detected"
+    BEHAVIOR_ANALYZED = "behavior.analyzed"
+    RECOMMENDATION_GENERATED = "recommendation.generated"
+
     # Custom events
     CUSTOM = "custom"

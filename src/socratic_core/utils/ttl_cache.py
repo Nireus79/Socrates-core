@@ -178,12 +178,13 @@ class TTLCache:
         return f"<TTLCache ttl={self._ttl.total_seconds()/60:.0f}min size={len(self._cache)}>"
 
 
-def cached(ttl_minutes: int = 5) -> TTLCache:
+def cached(ttl_minutes: int = None, ttl: int = None) -> TTLCache:
     """
     Decorator factory for caching function results with TTL.
 
     Args:
         ttl_minutes: Time-to-live in minutes (default: 5)
+        ttl: Time-to-live in seconds (alias for ttl_minutes, converts to minutes)
 
     Returns:
         TTLCache decorator instance
@@ -199,4 +200,12 @@ def cached(ttl_minutes: int = 5) -> TTLCache:
         >>> stats = get_project_summary.cache_stats()
         >>> print(stats)  # {'hits': 1, 'misses': 1, 'hit_rate': '50.0%', ...}
     """
-    return TTLCache(ttl_minutes=ttl_minutes)
+    # Handle both ttl (in seconds) and ttl_minutes (in minutes)
+    if ttl is not None:
+        ttl_minutes_value = ttl / 60.0  # Convert seconds to minutes (allow fractional minutes)
+    elif ttl_minutes is not None:
+        ttl_minutes_value = ttl_minutes
+    else:
+        ttl_minutes_value = 5
+
+    return TTLCache(ttl_minutes=ttl_minutes_value)

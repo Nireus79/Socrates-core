@@ -173,7 +173,7 @@ class TTLCache:
             return len(expired_keys)
 
 
-def cached(ttl_minutes: float = 5) -> Callable:
+def cached(ttl_minutes: Optional[float] = None, ttl: Optional[float] = None) -> Callable:
     """
     Decorator for caching function results with TTL.
 
@@ -182,14 +182,22 @@ def cached(ttl_minutes: float = 5) -> Callable:
 
     Args:
         ttl_minutes: Time-to-live in minutes (default: 5)
+        ttl: Time-to-live in seconds (alias for ttl_minutes, converts to minutes)
 
     Returns:
         Decorator function
     """
+    # Handle both ttl (in seconds) and ttl_minutes (in minutes)
+    if ttl is not None:
+        ttl_minutes_value = ttl / 60.0
+    elif ttl_minutes is not None:
+        ttl_minutes_value = ttl_minutes
+    else:
+        ttl_minutes_value = 5
 
     def decorator(func: Callable) -> Callable:
         """Actual decorator."""
-        cache = TTLCache(ttl_minutes=ttl_minutes)
+        cache = TTLCache(ttl_minutes=ttl_minutes_value)
         stats = {"hits": 0, "misses": 0}
         stats_lock = threading.Lock()
 

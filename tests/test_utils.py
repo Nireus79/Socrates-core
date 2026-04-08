@@ -117,10 +117,10 @@ class TestCachedDecorator:
             call_count += 1
             return x * 2
 
-        result1 = expensive_function(5)
+        expensive_function(5)
         assert call_count == 1
 
-        result2 = expensive_function(10)
+        expensive_function(10)
         assert call_count == 2  # Different arg, should call again
 
     def test_cached_ttl_expiration(self):
@@ -133,12 +133,12 @@ class TestCachedDecorator:
             call_count += 1
             return x * 2
 
-        result1 = expensive_function(5)
+        expensive_function(5)
         assert call_count == 1
 
         time.sleep(1.1)
 
-        result2 = expensive_function(5)
+        expensive_function(5)
         assert call_count == 2  # Cache expired
 
     def test_cached_with_kwargs(self):
@@ -151,13 +151,13 @@ class TestCachedDecorator:
             call_count += 1
             return a + b
 
-        result1 = function(5, b=10)
+        function(5, b=10)
         assert call_count == 1
 
-        result2 = function(5, b=10)
+        function(5, b=10)
         assert call_count == 1  # Should use cache
 
-        result3 = function(5, b=20)
+        function(5, b=20)
         assert call_count == 2  # Different kwargs
 
     def test_cached_preserves_function_name(self):
@@ -220,10 +220,10 @@ class TestCachedDecorator:
         assert result1 == 6
         assert call_count == 1
 
-        result2 = function(1, 2, 3)
+        function(1, 2, 3)
         assert call_count == 1
 
-        result3 = function(1, 2, 4)
+        function(1, 2, 4)
         assert call_count == 2
 
     def test_cache_string_arguments(self):
@@ -236,13 +236,13 @@ class TestCachedDecorator:
             call_count += 1
             return a + b
 
-        result1 = concat("hello", "world")
+        concat("hello", "world")
         assert call_count == 1
 
-        result2 = concat("hello", "world")
+        concat("hello", "world")
         assert call_count == 1
 
-        result3 = concat("hello", "there")
+        concat("hello", "there")
         assert call_count == 2
 
     def test_cache_list_arguments(self):

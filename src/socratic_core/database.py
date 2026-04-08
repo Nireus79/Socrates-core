@@ -1,4 +1,5 @@
 """
+import threading
 Database Client Interface and Implementations.
 
 Provides abstract DatabaseClient interface and concrete implementations
@@ -118,7 +119,9 @@ class SQLiteClient(DatabaseClient):
                 self.connection = conn
         else:
             # Use single connection (in-memory or pool disabled)
-            self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
+            # Thread-safe direct connection
+            with self._db_lock:
+                self.connection = sqlite3.connect(str(self.db_path), timeout=30)
             if self.connection:
                 self.connection.row_factory = sqlite3.Row
                 self.connection.execute("PRAGMA foreign_keys = ON")

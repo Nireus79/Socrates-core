@@ -8,6 +8,7 @@ Enables loose coupling between services.
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
+import logging
 
 
 @dataclass
@@ -53,6 +54,7 @@ class EventBus:
 
     def __init__(self):
         """Initialize event bus."""
+        self._logger = logging.getLogger(__name__)
         self._subscribers: Dict[str, List[Callable]] = {}
         self._event_history: List[Event] = []
 
@@ -103,7 +105,7 @@ class EventBus:
                 try:
                     await handler(event)
                 except Exception as e:
-                    print(f"Error in event handler for {event_type}: {e}")
+                    self._logger.error(f"Error in event handler for {event_type}: {e}", exc_info=True)
 
     def get_event_history(self, event_type: Optional[str] = None, limit: int = 100) -> List[Event]:
         """

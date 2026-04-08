@@ -153,7 +153,8 @@ class SQLiteClient(DatabaseClient):
         cursor = self.connection.cursor()
 
         # Users table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL UNIQUE,
@@ -163,10 +164,12 @@ class SQLiteClient(DatabaseClient):
                 updated_at TEXT NOT NULL,
                 metadata TEXT
             )
-            """)
+            """
+        )
 
         # Projects table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS projects (
                 project_id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -178,10 +181,12 @@ class SQLiteClient(DatabaseClient):
                 metadata TEXT,
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
-            """)
+            """
+        )
 
         # Sessions table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS sessions (
                 session_id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -192,10 +197,12 @@ class SQLiteClient(DatabaseClient):
                 FOREIGN KEY(user_id) REFERENCES users(user_id),
                 FOREIGN KEY(project_id) REFERENCES projects(project_id)
             )
-            """)
+            """
+        )
 
         # Interactions table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS interactions (
                 interaction_id TEXT PRIMARY KEY,
                 session_id TEXT,
@@ -212,10 +219,12 @@ class SQLiteClient(DatabaseClient):
                 FOREIGN KEY(session_id) REFERENCES sessions(session_id),
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
-            """)
+            """
+        )
 
         # Questions table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS questions (
                 question_id TEXT PRIMARY KEY,
                 project_id TEXT NOT NULL,
@@ -228,10 +237,12 @@ class SQLiteClient(DatabaseClient):
                 metadata TEXT,
                 FOREIGN KEY(project_id) REFERENCES projects(project_id)
             )
-            """)
+            """
+        )
 
         # Patterns table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS patterns (
                 pattern_id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -241,10 +252,12 @@ class SQLiteClient(DatabaseClient):
                 metadata TEXT,
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
-            """)
+            """
+        )
 
         # Metrics table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS metrics (
                 metric_id TEXT PRIMARY KEY,
                 session_id TEXT,
@@ -256,10 +269,12 @@ class SQLiteClient(DatabaseClient):
                 FOREIGN KEY(session_id) REFERENCES sessions(session_id),
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
-            """)
+            """
+        )
 
         # Recommendations table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS recommendations (
                 recommendation_id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -270,7 +285,8 @@ class SQLiteClient(DatabaseClient):
                 metadata TEXT,
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
-            """)
+            """
+        )
 
         assert self.connection is not None
         self.connection.commit()

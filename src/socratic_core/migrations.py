@@ -53,7 +53,8 @@ class MigrationRunner:
     def _ensure_migrations_table(self, conn: sqlite3.Connection) -> None:
         """Ensure migrations tracking table exists."""
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS __migrations__ (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 version TEXT NOT NULL UNIQUE,
@@ -61,7 +62,8 @@ class MigrationRunner:
                 applied_at TEXT NOT NULL,
                 duration_ms REAL NOT NULL
             )
-            """)
+            """
+        )
         conn.commit()
 
     def register_migration(self, migration: Migration) -> None:

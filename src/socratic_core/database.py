@@ -1,5 +1,4 @@
 """
-import threading
 Database Client Interface and Implementations.
 
 Provides abstract DatabaseClient interface and concrete implementations
@@ -7,6 +6,7 @@ Provides abstract DatabaseClient interface and concrete implementations
 """
 
 import sqlite3
+import threading
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -99,6 +99,7 @@ class SQLiteClient(DatabaseClient):
         self.max_overflow = max_overflow
         self.pool_timeout = pool_timeout
 
+        self._db_lock = threading.RLock()
     async def connect(self) -> None:
         """Establish SQLite connection."""
         if not self.db_path.startswith(":memory:"):
@@ -547,6 +548,7 @@ class PostgresClient(DatabaseClient):
     """PostgreSQL implementation of DatabaseClient (stub for future use)."""
 
     def __init__(self, connection_string: str):
+        self._db_lock = threading.RLock()
         """
         Initialize PostgreSQL client.
 

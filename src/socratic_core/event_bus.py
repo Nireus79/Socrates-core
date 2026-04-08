@@ -5,10 +5,10 @@ Services publish events and subscribe to events they care about.
 Enables loose coupling between services.
 """
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
-import logging
 
 
 @dataclass
@@ -105,7 +105,10 @@ class EventBus:
                 try:
                     await handler(event)
                 except Exception as e:
-                    self._logger.error(f"Error in event handler for {event_type}: {e}", exc_info=True)
+                    self._logger.error(
+                        f"Error in event handler for {event_type}: {e}",
+                        exc_info=True
+                    )
 
     def get_event_history(self, event_type: Optional[str] = None, limit: int = 100) -> List[Event]:
         """

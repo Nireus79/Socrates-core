@@ -4,7 +4,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 logger = logging.getLogger(__name__)
 
@@ -408,11 +408,11 @@ class MetricsCollector:
 
     def get_metrics_prometheus(self) -> str:
         """Get metrics in Prometheus format."""
-        return self.registry.export_prometheus()
+        return cast(str, self.registry.export_prometheus())
 
     def get_metrics_json(self) -> Dict[str, Any]:
         """Get metrics as JSON."""
-        return self.registry.export_json()
+        return cast(Dict[str, Any], self.registry.export_json())
 
     def get_cache_hit_rate(self) -> float:
         """Calculate cache hit rate."""

@@ -20,7 +20,7 @@ class PoolStats:
     idle_connections: int = 0
     total_requests: int = 0
     total_releases: int = 0
-    created_at: datetime = None
+    created_at: Optional[datetime] = None
 
     def __post_init__(self):
         if self.created_at is None:
@@ -170,7 +170,7 @@ class ConnectionPool:
             "idle_connections": self._stats.idle_connections,
             "total_requests": self._stats.total_requests,
             "total_releases": self._stats.total_releases,
-            "created_at": self._stats.created_at.isoformat(),
+            "created_at": self._stats.created_at.isoformat() if self._stats.created_at else None,
             "pool_size": self.pool_size,
             "max_overflow": self.max_overflow,
         }

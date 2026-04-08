@@ -10,7 +10,7 @@ Provides:
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, cast
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class AgentOrchestrator:
     def register_lazy_agent(
         self,
         name: str,
-        factory: callable,
+        factory: Callable,
         description: str = "",
         capabilities: Optional[list] = None,
     ) -> None:
@@ -171,9 +171,9 @@ class AgentOrchestrator:
 
             # Call agent's process method
             if hasattr(agent, "process"):
-                result = agent.process(request)
+                result = cast(Dict[str, Any], agent.process(request))
             elif callable(agent):
-                result = agent(request)
+                result = cast(Dict[str, Any], agent(request))
             else:
                 result = {
                     "status": "error",
@@ -240,8 +240,8 @@ class AgentOrchestrator:
         Returns:
             Workflow result with all step outputs
         """
-        workflow_results = {}
-        variables = {}
+        workflow_results: Dict[str, Any] = {}
+        variables: Dict[str, Any] = {}
 
         try:
             for step_idx, step in enumerate(steps):
@@ -304,7 +304,7 @@ class AgentOrchestrator:
         else:
             self.logger.debug(f"Event emitted (no event bus): {event_type}")
 
-    def on_event(self, event_type: str, callback: callable) -> None:
+    def on_event(self, event_type: str, callback: Callable) -> None:
         """
         Register event listener.
 

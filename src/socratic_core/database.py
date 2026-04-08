@@ -144,6 +144,7 @@ class SQLiteClient(DatabaseClient):
         if not self.connection:
             await self.connect()
 
+        assert self.connection is not None
         cursor = self.connection.cursor()
 
         # Users table
@@ -266,12 +267,15 @@ class SQLiteClient(DatabaseClient):
             )
             """)
 
+        assert self.connection is not None
         self.connection.commit()
 
     async def save_entity(self, entity_type: str, entity_id: str, data: Dict[str, Any]) -> bool:
         """Save or update an entity."""
         if not self.connection:
             await self.connect()
+
+        assert self.connection is not None
 
         import json
 
@@ -361,6 +365,7 @@ class SQLiteClient(DatabaseClient):
                 ),
             )
 
+        assert self.connection is not None
         self.connection.commit()
         return True
 
@@ -368,6 +373,8 @@ class SQLiteClient(DatabaseClient):
         """Load an entity by ID."""
         if not self.connection:
             await self.connect()
+
+        assert self.connection is not None
 
         import json
 
@@ -409,6 +416,7 @@ class SQLiteClient(DatabaseClient):
         if not self.connection:
             await self.connect()
 
+        assert self.connection is not None
         cursor = self.connection.cursor()
 
         if entity_type == "user":
@@ -422,6 +430,7 @@ class SQLiteClient(DatabaseClient):
         else:
             return False
 
+        assert self.connection is not None
         self.connection.commit()
         return cursor.rowcount > 0
 
@@ -435,6 +444,8 @@ class SQLiteClient(DatabaseClient):
         """Query entities with optional filtering."""
         if not self.connection:
             await self.connect()
+
+        assert self.connection is not None
 
         import json
 
@@ -500,6 +511,7 @@ class SQLiteClient(DatabaseClient):
         if not self.connection:
             await self.connect()
 
+        assert self.connection is not None
         cursor = self.connection.cursor()
         cursor.execute(query, params or {})
         self.connection.commit()

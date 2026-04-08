@@ -5,7 +5,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +197,7 @@ class EnvironmentManager:
         """
         try:
             with open(filepath, "r") as f:
-                secrets = json.load(f)
+                secrets = cast(Dict[str, str], json.load(f))
 
             self._secret_store.update(secrets)
             logger.info(f"Loaded {len(secrets)} secrets from {filepath}")

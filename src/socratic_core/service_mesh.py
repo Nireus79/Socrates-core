@@ -319,7 +319,7 @@ class LoadBalancer:
             import random
 
             r = random.uniform(0, total)
-            current = 0
+            current = 0.0
             for instance, weight in zip(available, weights):
                 current += weight
                 if r <= current:
@@ -383,7 +383,8 @@ class ServiceMeshProxy:
         start = time.time()
         try:
             # Simulate service call
-            response = await asyncio.sleep(0.01)  # Placeholder
+            await asyncio.sleep(0.01)  # Placeholder
+            response: Any = {}
             duration = (time.time() - start) * 1000
             self.mesh.record_request(
                 service_name,

@@ -3,7 +3,7 @@
 import logging
 import sqlite3
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +238,7 @@ class MigrationRunner:
 
         return results
 
-    def get_migration_status(self) -> Dict[str, any]:
+    def get_migration_status(self) -> Dict[str, Any]:
         """Get migration status."""
         applied = self.get_applied_migrations()
         pending = self.get_pending_migrations()

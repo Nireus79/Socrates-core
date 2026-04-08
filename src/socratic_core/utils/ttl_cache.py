@@ -8,7 +8,7 @@ import functools
 import logging
 import threading
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 
 class TTLCache:
@@ -178,7 +178,7 @@ class TTLCache:
         return f"<TTLCache ttl={self._ttl.total_seconds()/60:.0f}min size={len(self._cache)}>"
 
 
-def cached(ttl_minutes: int = None, ttl: int = None) -> TTLCache:
+def cached(ttl_minutes: Optional[int] = None, ttl: Optional[int] = None) -> TTLCache:
     """
     Decorator factory for caching function results with TTL.
 
@@ -202,7 +202,7 @@ def cached(ttl_minutes: int = None, ttl: int = None) -> TTLCache:
     """
     # Handle both ttl (in seconds) and ttl_minutes (in minutes)
     if ttl is not None:
-        ttl_minutes_value = ttl / 60.0  # Convert seconds to minutes (allow fractional minutes)
+        ttl_minutes_value = int(ttl / 60.0)  # Convert seconds to minutes
     elif ttl_minutes is not None:
         ttl_minutes_value = ttl_minutes
     else:

@@ -106,8 +106,7 @@ class EventBus:
                     await handler(event)
                 except Exception as e:
                     self._logger.error(
-                        f"Error in event handler for {event_type}: {e}",
-                        exc_info=True
+                        f"Error in event handler for {event_type}: {e}", exc_info=True
                     )
 
     def get_event_history(self, event_type: Optional[str] = None, limit: int = 100) -> List[Event]:
